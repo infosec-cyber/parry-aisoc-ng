@@ -1,0 +1,39 @@
+version: "2.0"
+services:
+  ollama:
+    image: ollama/ollama:0.5.11
+    expose:
+      - port: 11434
+        as: 80
+        to:
+          - global: true
+    env:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_KEEP_ALIVE=24h
+profiles:
+  compute:
+    ollama:
+      resources:
+        cpu:
+          units: 4.0
+        memory:
+          size: 10Gi
+        storage:
+          size: 24Gi
+        gpu:
+          units: 1
+          attributes:
+            vendor:
+              nvidia:
+                - model: a100
+  placement:
+    dcloud:
+      pricing:
+        ollama:
+          denom: uakt
+          amount: 12000000
+deployment:
+  ollama:
+    dcloud:
+      profile: ollama
+      count: 1

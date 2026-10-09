@@ -1,0 +1,61 @@
+rules:
+  - id: formatted-sql-query
+    message: SQL query built with % string formatting from user input — SQL injection.
+    severity: ERROR
+    languages: [python]
+    patterns:
+      - pattern-either:
+          - pattern: $DB.execute("..." % ...)
+          - pattern: |
+              $SQL = "..." % (...)
+              ...
+              $DB.execute($SQL)
+    metadata: {cwe: CWE-89}
+
+  - id: subprocess-shell-true
+    message: subprocess with shell=True and interpolated user input — command injection.
+    severity: ERROR
+    languages: [python]
+    pattern: subprocess.run("..." % ..., shell=True, ...)
+    metadata: {cwe: CWE-78}
+
+  - id: missing-ownership-check
+    message: Object fetched by id without comparing owner to the session user — IDOR.
+    severity: ERROR
+    languages: [python]
+    patterns:
+      - pattern: $DB.execute("SELECT * FROM notes WHERE id=?", ...)
+      - pattern-not-inside: |
+          if $ROW["user_id"] != $U["uid"]:
+              ...
+    metadata: {cwe: CWE-639}
+
+  - id: client-side-authz
+    message: Role check deferred to the client ("checked client-side") — broken access control.
+    severity: ERROR
+    languages: [python]
+    patterns:
+      - pattern-regex: "checked client-side"
+    metadata: {cwe: CWE-862}
+
+  - id: hardcoded-jwt-secret
+    message: Hardcoded JWT signing secret in source.
+    severity: ERROR
+    languages: [python]
+    pattern: JWT_SECRET = "..."
+    metadata: {cwe: CWE-798}
+
+  - id: no-rate-limit
+    message: Login handler has no rate limiting / lockout — credential brute force.
+    severity: WARNING
+    languages: [python]
+    patterns:
+      - pattern: |
+          @app.route("/login", ...)
+          def $F(...):
+              ...
+      - pattern-not-inside: |
+          @limiter.limit(...)
+          def $F(...):
+              ...
+    metadata: {cwe: CWE-307}

@@ -1,0 +1,347 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Parry — Autonomous AI SOC · Deck</title>
+<style>
+:root{
+  --bg:#0a0e14;--panel:#121820;--panel2:#0f141b;--line:#202a35;--txt:#e9eef5;--muted:#93a1b2;
+  --accent:#4c8dff;--accent2:#7aa2ff;--ok:#2fb344;
+  --critical:#ff4d6d;--high:#ff8c42;--medium:#ffcf33;--low:#4dabf7;
+  --ch:#ffd23f;--akash:#ff5c4d;--semgrep:#17b890;--senso:#b36bff;--guild:#4db5ff;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#05080c;color:var(--txt);font:16px/1.55 -apple-system,Segoe UI,Roboto,sans-serif}
+.deck{scroll-snap-type:y mandatory;overflow-y:scroll;height:100vh}
+.slide{scroll-snap-align:start;min-height:100vh;width:100%;padding:64px 80px;display:flex;flex-direction:column;justify-content:center;position:relative;border-bottom:1px solid #0d1218;background:radial-gradient(1200px 700px at 80% -10%,rgba(76,141,255,.08),transparent)}
+.slide::after{content:attr(data-n);position:absolute;bottom:26px;right:34px;color:#44505f;font:12px var(--mono)}
+.kick{color:var(--accent2);font:13px/1 var(--mono);letter-spacing:3px;text-transform:uppercase;margin-bottom:18px}
+h1{font-size:62px;line-height:1.02;margin:0 0 18px;letter-spacing:-1.5px}
+h1 .p{color:var(--accent)}
+h2{font-size:38px;margin:0 0 26px;letter-spacing:-.7px}
+h3{font-size:19px;margin:0 0 8px}
+.lead{font-size:22px;color:#c7d2de;max-width:980px}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono)}
+.row{display:flex;gap:22px}.col{flex:1}
+ul{margin:10px 0 0;padding-left:0;list-style:none}
+li{padding:7px 0 7px 26px;position:relative;color:#cdd8e4;font-size:17px}
+li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+.card.badge-ch{border-top:3px solid var(--ch)} .card.badge-akash{border-top:3px solid var(--akash)}
+.card.badge-semgrep{border-top:3px solid var(--semgrep)} .card.badge-senso{border-top:3px solid var(--senso)}
+.card.badge-guild{border-top:3px solid var(--guild)}
+.tag{display:inline-block;font:11px var(--mono);text-transform:uppercase;letter-spacing:1px;padding:3px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+.tag.live{color:var(--ok);border-color:#2a6b3a;background:rgba(47,179,68,.08)}
+.kpi{display:flex;gap:40px;margin-top:10px;flex-wrap:wrap}
+.kpi .n{font:800 46px var(--mono);color:#fff}.kpi .n.a{color:var(--accent)}.kpi .n.c{color:var(--critical)}
+.kpi .l{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.6px}
+.shot{border:1px solid var(--line);border-radius:12px;max-width:100%;max-height:62vh;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.pill{display:inline-flex;align-items:center;gap:8px;font:12px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:5px 12px;margin:4px 6px 0 0}
+.pill .d{width:8px;height:8px;border-radius:50%}
+.flow{font:13px var(--mono);color:#aab6c4}
+.hl{color:#fff;font-weight:700}
+.big{font-size:26px;line-height:1.4;color:#d7e0ea;max-width:1000px}
+code{font-family:var(--mono);background:#0d1420;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:14px;color:#cfe0ff}
+.nav{position:fixed;top:16px;right:20px;z-index:10;font:12px var(--mono);color:#52606f}
+svg text{font-family:var(--mono)}
+@media print{.deck{height:auto;overflow:visible}.slide{min-height:auto;height:auto;page-break-after:always;padding:40px 50px}.nav{display:none}.slide::after{position:static;display:block;margin-top:18px}}
+</style></head>
+<body>
+<div class="nav">↑ ↓ to navigate · press P then Ctrl/Cmd-P to print</div>
+<div class="deck">
+
+<!-- 1 TITLE -->
+<section class="slide" data-n="1">
+  <div class="kick">Hackathon 2026 · Autonomous Defense</div>
+  <h1><span class="p">Parry</span> — the AI AppSec SOC<br>that fights back in real time</h1>
+  <p class="lead">An autonomous blue-team agent that watches every HTTP request, recognizes a live attack as it unfolds, explains it in plain language, and shuts it down — in under a second, with zero human in the loop.</p>
+  <div style="margin-top:28px">
+    <span class="pill"><span class="d" style="background:var(--ch)"></span>ClickHouse Cloud</span>
+    <span class="pill"><span class="d" style="background:var(--akash)"></span>Akash</span>
+    <span class="pill"><span class="d" style="background:var(--semgrep)"></span>Semgrep</span>
+    <span class="pill"><span class="d" style="background:var(--senso)"></span>Senso</span>
+    <span class="pill"><span class="d" style="background:var(--guild)"></span>Guild</span>
+  </div>
+</section>
+
+<!-- 2 PROBLEM -->
+<section class="slide" data-n="2">
+  <div class="kick">The problem</div>
+  <h2>Detection is solved. Response is not.</h2>
+  <div class="grid3">
+    <div class="card"><h3>Alerts, not actions</h3><p class="muted">SIEMs raise thousands of alerts. A human still has to triage, correlate, and decide — the attacker is long gone by then.</p></div>
+    <div class="card"><h3>The dwell-time gap</h3><p class="muted">Industry mean time to respond is measured in <span class="hl">hours to days</span>. An automated attack finishes its kill chain in <span class="hl">seconds</span>.</p></div>
+    <div class="card"><h3>Context lives in people</h3><p class="muted">"Is this real? What's the playbook?" The knowledge to answer sits in analysts' heads and stale wikis.</p></div>
+  </div>
+  <p class="big" style="margin-top:34px">What if the system that <span class="hl">sees</span> the attack could also <span class="hl">understand</span> it and <span class="hl">stop</span> it — autonomously, and show its work?</p>
+</section>
+
+<!-- 3 WHAT WE BUILT -->
+<section class="slide" data-n="3">
+  <div class="kick">What we built</div>
+  <h2>A closed detect → decide → respond loop</h2>
+  <div class="row">
+    <div class="col" style="flex:1.1">
+      <p class="lead" style="font-size:19px">Parry sits inline as a reverse proxy in front of a web app. Every request becomes a row in ClickHouse. A blue agent runs the full SOC loop continuously:</p>
+      <ul>
+        <li><span class="hl">DETECT</span> — streaming SQL rules over live telemetry (~ms)</li>
+        <li><span class="hl">TRIAGE</span> — an LLM on Akash scores &amp; explains each alert</li>
+        <li><span class="hl">GROUND</span> — Senso cites the verified response playbook</li>
+        <li><span class="hl">ACT</span> — block the IP, root-cause with Semgrep, write the fix + incident report with the LLM, escalate to Guild</li>
+      </ul>
+      <div class="kpi">
+        <div><div class="n a">ms</div><div class="l">SQL rule-match</div></div>
+        <div><div class="n">7/8</div><div class="l">kill-chain stages caught</div></div>
+        <div><div class="n c">4</div><div class="l">Semgrep root-cause fixes</div></div>
+      </div>
+    </div>
+    <div class="col" style="flex:1.4;text-align:center"><img class="shot" src="dashboard.png" alt="Parry dashboard"></div>
+  </div>
+</section>
+
+<!-- 4 ARCHITECTURE -->
+<section class="slide" data-n="4">
+  <div class="kick">Architecture · full system</div>
+  <h2>Five sponsors, one real-time pipeline</h2>
+  <svg viewBox="0 0 1180 560" width="100%" height="auto" style="max-height:66vh">
+    <defs>
+      <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#6f7f90"/></marker>
+      <marker id="arw" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#6f7f90"/></marker>
+      <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#ff5c6b"/></marker>
+    </defs>
+    <style>
+      .b{fill:#121820;stroke:#263241;rx:12} .bt{fill:#e9eef5;font-size:15px;font-weight:700}
+      .bs{fill:#93a1b2;font-size:11.5px} .e{stroke:#6f7f90;stroke-width:1.6;fill:none}
+      .er{stroke:#ff5c6b;stroke-width:1.8;fill:none;stroke-dasharray:5 4} .el{fill:#8ea0b2;font-size:11px}
+      .zone{fill:none;stroke:#1c2733;stroke-width:1;stroke-dasharray:3 4;rx:14}
+    </style>
+    <!-- attacker -->
+    <rect class="er" x="24" y="230" width="150" height="70" rx="12" fill="#1a0f12"/>
+    <text class="bt" x="99" y="262" text-anchor="middle" fill="#ff8a98">🔴 Red Agent</text>
+    <text class="bs" x="99" y="282" text-anchor="middle">8-stage kill chain</text>
+    <!-- proxy -->
+    <rect class="b" x="235" y="225" width="168" height="80"/>
+    <text class="bt" x="319" y="255" text-anchor="middle">mitmproxy</text>
+    <text class="bs" x="319" y="274" text-anchor="middle">reverse proxy :8080</text>
+    <text class="bs" x="319" y="290" text-anchor="middle">+ ch_sink · enforces 403</text>
+    <!-- target -->
+    <rect class="b" x="455" y="120" width="160" height="72"/>
+    <text class="bt" x="535" y="150" text-anchor="middle">NoteNest app</text>
+    <text class="bs" x="535" y="169" text-anchor="middle">vulnerable Flask target</text>
+    <!-- clickhouse -->
+    <rect class="b" x="455" y="300" width="160" height="86" style="stroke:#ffd23f55"/>
+    <text class="bt" x="535" y="330" text-anchor="middle">⬢ ClickHouse</text>
+    <text class="bs" x="535" y="349" text-anchor="middle">local capture buffer</text>
+    <text class="bs" x="535" y="365" text-anchor="middle">http_events + MVs</text>
+    <!-- cloud -->
+    <rect class="b" x="690" y="296" width="180" height="94" style="stroke:#ffd23f"/>
+    <text class="bt" x="780" y="324" text-anchor="middle" fill="#ffd23f">⬢ ClickHouse Cloud</text>
+    <text class="bs" x="780" y="343" text-anchor="middle">analytics brain · 443</text>
+    <text class="bs" x="780" y="359" text-anchor="middle">detections · blocklist</text>
+    <text class="bs" x="780" y="375" text-anchor="middle">materialized views</text>
+    <!-- blue agent -->
+    <rect class="b" x="690" y="90" width="300" height="150" style="stroke:#4c8dff"/>
+    <text class="bt" x="840" y="118" text-anchor="middle" fill="#4c8dff">🔵 Blue Agent — SOC loop</text>
+    <text class="bs" x="705" y="146">1 DETECT  streaming SQL rules</text>
+    <text class="bs" x="705" y="166">2 TRIAGE  Akash LLM scores + explains</text>
+    <text class="bs" x="705" y="186">3 GROUND  Senso cites playbook</text>
+    <text class="bs" x="705" y="206">4 ACT     block · Semgrep · Guild</text>
+    <text class="bs" x="705" y="228" fill="#6f7f90">reads + writes ClickHouse Cloud</text>
+    <!-- sponsors right column -->
+    <rect class="b" x="1010" y="70" width="150" height="46" style="stroke:#ff5c4d55"/>
+    <text class="bt" x="1085" y="92" text-anchor="middle" fill="#ff7a6d" font-size="13">Akash GPU</text>
+    <text class="bs" x="1085" y="107" text-anchor="middle">LLM triage</text>
+    <rect class="b" x="1010" y="126" width="150" height="46" style="stroke:#b36bff55"/>
+    <text class="bt" x="1085" y="148" text-anchor="middle" fill="#c38cff" font-size="13">Senso KB</text>
+    <text class="bs" x="1085" y="163" text-anchor="middle">grounding</text>
+    <rect class="b" x="1010" y="182" width="150" height="46" style="stroke:#17b89055"/>
+    <text class="bt" x="1085" y="204" text-anchor="middle" fill="#2ad0a6" font-size="13">Semgrep</text>
+    <text class="bs" x="1085" y="219" text-anchor="middle">root-cause + Guardian</text>
+    <rect class="b" x="1010" y="238" width="150" height="46" style="stroke:#4db5ff55"/>
+    <text class="bt" x="1085" y="260" text-anchor="middle" fill="#7ccaff" font-size="13">Guild</text>
+    <text class="bs" x="1085" y="275" text-anchor="middle">SOC commander</text>
+    <!-- dashboard -->
+    <rect class="b" x="690" y="440" width="180" height="60"/>
+    <text class="bt" x="780" y="468" text-anchor="middle">📊 Dashboard</text>
+    <text class="bs" x="780" y="486" text-anchor="middle">+ ClickHouse native tiles</text>
+    <!-- edges -->
+    <path class="er" marker-end="url(#arr)" d="M174,265 H233"/>
+    <text class="el" x="180" y="256" fill="#ff8a98">attacks</text>
+    <path class="e" marker-end="url(#arw)" d="M403,250 C430,250 430,160 453,158"/>
+    <text class="el" x="412" y="200">proxies</text>
+    <path class="e" marker-end="url(#arw)" d="M403,285 C430,330 430,340 453,343"/>
+    <text class="el" x="410" y="312">mirrors flows</text>
+    <path class="e" marker-end="url(#arw)" d="M615,345 H688"/>
+    <text class="el" x="620" y="337">sync 443</text>
+    <path class="e" marker-end="url(#arw)" d="M780,296 V242"/>
+    <text class="el" x="788" y="272">SQL rules</text>
+    <path class="e" marker-end="url(#arw)" d="M990,120 C1000,120 1000,93 1008,93"/>
+    <path class="e" marker-end="url(#arw)" d="M990,150 H1008"/>
+    <path class="e" marker-end="url(#arw)" d="M990,180 C1000,180 1000,205 1008,205"/>
+    <path class="e" marker-end="url(#arw)" d="M990,210 C1000,210 1000,261 1008,261"/>
+    <text class="el" x="930" y="86">ACT lanes</text>
+    <path class="er" marker-end="url(#arr)" d="M760,392 C560,480 430,420 335,307"/>
+    <text class="el" x="520" y="470" fill="#ff8a98">push block → proxy returns 403</text>
+    <path class="e" marker-end="url(#arw)" d="M780,390 V438"/>
+    <text class="el" x="788" y="418">reads</text>
+  </svg>
+</section>
+
+<!-- 5 ARCHITECTURE DETAIL -->
+<section class="slide" data-n="5">
+  <div class="kick">Architecture · the loop in detail</div>
+  <h2>How one request becomes an autonomous block</h2>
+  <div class="grid2" style="gap:24px">
+    <div class="card"><h3 style="color:var(--accent)">Ingest path</h3>
+      <p class="flow"><span class="hl">request</span> → mitmproxy (reverse proxy) → target app<br>↳ ch_sink addon writes a full flow row to ClickHouse<br>↳ host mirror streams it to ClickHouse Cloud on :443<br>↳ two materialized views pre-aggregate rate &amp; auth at ingest</p>
+      <p class="muted" style="margin-top:14px">Batching keeps insert latency ~1s end-to-end, so the brain sees traffic almost live.</p>
+    </div>
+    <div class="card"><h3 style="color:var(--accent)">Decision path (every 2s)</h3>
+      <p class="flow">1 run 8 detection rules as <span class="hl">SQL over Cloud</span><br>2 Akash LLM returns {severity, confidence, summary}<br>3 Senso returns the cited playbook + doc ids<br>4 enrich: MITRE ATT&CK id + confidence on every row<br>5 if critical → blocklist (Cloud+local) → proxy 403<br>&nbsp;&nbsp;&nbsp;Semgrep pins the line → LLM writes the patch<br>&nbsp;&nbsp;&nbsp;LLM composes the incident report; Guild adjudicates</p>
+    </div>
+  </div>
+  <p class="big" style="margin-top:26px">Every conclusion is <span class="hl">grounded in rows</span>: each detection stores the exact flow ids, the model that scored it, the playbook docs it cited, and the measured latency.</p>
+</section>
+
+<!-- 6 DEMO -->
+<section class="slide" data-n="6">
+  <div class="kick">Live demo · what you will see</div>
+  <h2>A full attack, caught and killed</h2>
+  <div class="row">
+    <div class="col">
+      <p class="muted">The red agent runs an 8-stage kill chain against NoteNest. Watch the dashboard light up stage by stage:</p>
+      <ul>
+        <li><span class="mono">recon</span> → path-discovery sweep flagged <span class="muted">(low)</span></li>
+        <li><span class="mono">bruteforce</span> → credential stuffing on /login <span class="muted">(medium)</span></li>
+        <li><span class="mono">sqli-probe</span> → UNION injection attempt <span class="muted">(high)</span></li>
+        <li><span class="mono">idor</span> → walking other users' private notes <span class="muted">(high)</span></li>
+        <li><span class="mono">exfil-canary</span> → Stripe key + DB creds leave the app <span style="color:var(--critical)">(critical)</span></li>
+        <li><span class="mono">bac-admin</span> → non-admin hits /api/admin/users <span class="muted">(high)</span></li>
+        <li><span class="mono">cmdinj</span> → shell metacharacters in export <span style="color:var(--critical)">(critical)</span> → <span class="hl">IP BLOCKED</span></li>
+      </ul>
+      <p class="big" style="margin-top:16px">The attacker's next requests come back <code>403 blocked by parry</code> — and the dashboard shows an <span class="hl">AI incident report</span> and the <span class="hl">AI-written patch</span> for each bug.</p>
+    </div>
+    <div class="col" style="text-align:center"><img class="shot" src="dashboard-mid.png" alt="mid attack"></div>
+  </div>
+</section>
+
+<!-- 7 CLICKHOUSE -->
+<section class="slide" data-n="7">
+  <div class="kick">Sponsor · used optimally</div>
+  <h2 style="color:var(--ch)">⬢ ClickHouse Cloud — the real-time brain</h2>
+  <div class="grid2">
+    <div class="card badge-ch"><h3>Detection IS a SQL query</h3><p class="muted">All 8 detectors are streaming SQL over live telemetry — no bespoke rules engine. Add a detection by writing one <code>SELECT … HAVING</code>.</p></div>
+    <div class="card badge-ch"><h3>Materialized views at ingest</h3><p class="muted"><code>AggregatingMergeTree</code> MVs pre-compute per-source request/error rate and auth-failure pressure with <code>countState</code>/<code>uniqState</code> — the rate chart is a <code>countMerge</code>, not a scan.</p></div>
+    <div class="card badge-ch"><h3>Cloud-native, schema-smart</h3><p class="muted">Runs on <span class="hl">ClickHouse Cloud 26.x</span> with idle auto-scaling. <code>Map(String,String)</code> headers, <code>LowCardinality</code> dims, <code>ZSTD</code>-coded bodies.</p></div>
+    <div class="card badge-ch"><h3>One store, two dashboards</h3><p class="muted">Parry's UI and a <span class="hl">ClickHouse-native dashboard</span> (8 saved-query tiles over the same MVs) read identical live data.</p></div>
+  </div>
+  <div style="margin-top:18px"><span class="tag live">live in demo</span><span class="tag">materialized views</span><span class="tag">cloud 443-only egress</span><span class="tag">native dashboards</span></div>
+</section>
+
+<!-- 8 AKASH -->
+<section class="slide" data-n="8">
+  <div class="kick">Sponsor · used optimally</div>
+  <h2 style="color:var(--akash)">▲ Akash — decentralized GPU for triage</h2>
+  <div class="grid2">
+    <div class="card badge-akash"><h3>New Console API, no CLI, no keys-on-chain</h3><p class="muted">We deploy entirely through the <span class="hl">Akash Console API</span>: POST an SDL, poll bids, pick the cheapest, create the lease — all signed by the managed wallet.</p></div>
+    <div class="card badge-akash"><h3>Automatic funding + runtime cap</h3><p class="muted">No manual escrow top-ups. Every deploy sets <code>runtimeLimitHours</code> so it auto-closes and refunds — budget-safe by construction.</p></div>
+    <div class="card badge-akash"><h3>OpenAI-compatible LLM on a GPU</h3><p class="muted">Ollama serving <code>qwen2.5</code> on a rented GPU, exposed as <code>/v1/chat/completions</code>. The blue agent's triage lane points straight at it.</p></div>
+    <div class="card badge-akash"><h3>One GPU, three AI jobs</h3><p class="muted">The same Akash-hosted model <span class="hl">triages</span> each alert, <span class="hl">writes the code patch</span>, and composes a <span class="hl">CISO incident report</span> — ~0.5s warm, pennies/hour.</p></div>
+  </div>
+  <div style="margin-top:18px"><span class="tag">console API</span><span class="tag">managed wallet</span><span class="tag">GPU marketplace</span><span class="tag">OpenAI-compatible</span></div>
+</section>
+
+<!-- 9 SEMGREP -->
+<section class="slide" data-n="9">
+  <div class="kick">Sponsor · used optimally</div>
+  <h2 style="color:var(--semgrep)">⬡ Semgrep — from alert to root cause</h2>
+  <div class="grid2">
+    <div class="card badge-semgrep"><h3>Detection → the exact vulnerable line</h3><p class="muted">When a high/critical fires, Parry runs Semgrep on the target source and pins the root cause: <code>app.py:127 formatted-sql-query (CWE-89)</code>.</p></div>
+    <div class="card badge-semgrep"><h3>Semgrep finds it → Akash LLM fixes it</h3><p class="muted">The flagged line is handed to our Akash GPU LLM, which writes a <span class="hl">secure patch</span> — parameterized SQL, ownership checks, <code>shell=False</code> — shown live on the dashboard as a diff.</p></div>
+    <div class="card badge-semgrep"><h3>Guardian / AppSec platform</h3><p class="muted">Authenticated with a Semgrep app token; findings flow to the hosted deployment (<span class="mono">rotemb-appsec</span>) for triage and tracking.</p></div>
+    <div class="card badge-semgrep"><h3>Closes the loop to code</h3><p class="muted">The blue agent can open a PR with the fix — detection, root cause, and patch become one continuous thread.</p></div>
+  </div>
+  <div style="margin-top:18px"><span class="tag">custom rules</span><span class="tag">p/flask Pro</span><span class="tag">Guardian token</span><span class="tag">CWE/OWASP mapped</span></div>
+</section>
+
+<!-- 10 ADAPTIVE DEFENSE -->
+<section class="slide" data-n="10">
+  <div class="kick">What makes it smart</div>
+  <h2>It learns, and it rotates — automatically</h2>
+  <div class="row">
+    <div class="col">
+      <div class="card" style="margin-bottom:14px"><h3 style="color:var(--senso)">🧬 Auto-learned rules</h3><p class="muted">A successful exploit, seen <span class="hl">once</span>, is distilled into a durable ClickHouse SQL rule — validated, named by the Akash LLM, and armed instantly. The next attempt is caught by the learned rule, not luck.</p></div>
+      <div class="card"><h3 style="color:var(--ch)">🔄 Automatic secret rotation</h3><p class="muted">The moment exfiltration is detected, every secret that was touched — Stripe key, DB creds, admin password — is <span class="hl">rotated for real</span> in the target. The stolen secret is already dead.</p></div>
+      <p class="big" style="margin-top:18px">Re-run the same attack and it's fully neutralized: every request <code>403</code>, every secret already rotated.</p>
+    </div>
+    <div class="col" style="text-align:center"><img class="shot" src="dashboard-mid.png" alt="adaptive battle" style="max-height:66vh"></div>
+  </div>
+</section>
+
+<!-- 11 SENSO + GUILD -->
+<section class="slide" data-n="11">
+  <div class="kick">Sponsors · used optimally</div>
+  <h2>Grounding &amp; human-accountable decisions</h2>
+  <div class="grid2">
+    <div class="card badge-senso"><h3 style="color:var(--senso)">Senso — verified grounding</h3>
+      <p class="muted">Response playbooks &amp; asset inventory live in a Senso knowledge base. Triage queries it and <span class="hl">cites the doc ids</span> (<code>grounded_by</code>) behind each call.</p>
+      <ul><li>answers come with sources, not vibes</li><li>alerts Senso can't ground = a coverage backlog</li><li>also our agents' shared memory across the build</li></ul>
+    </div>
+    <div class="card badge-guild"><h3 style="color:var(--guild)">Guild — the SOC commander</h3>
+      <p class="muted">A hosted LangGraph agent adjudicates every <span class="hl">critical</span> detection: confirm or downgrade, approve or veto the block, write a CISO-ready summary.</p>
+      <ul><li>runs on Guild's control plane, not our box</li><li>session logs = tamper-evident audit trail</li><li>triggered by API from the blue agent</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 12 RESULTS -->
+<section class="slide" data-n="12">
+  <div class="kick">Results</div>
+  <h2>Measured on the live demo run <span class="muted" style="font-size:16px">· Akash GPU LLM + ClickHouse Cloud + Semgrep, all live</span></h2>
+  <div class="kpi" style="gap:46px">
+    <div><div class="n a">~50ms</div><div class="l">SQL detection (rule match)</div></div>
+    <div><div class="n">2.2s</div><div class="l">p50 attack → AI-triaged</div></div>
+    <div><div class="n">7/8</div><div class="l">kill-chain stages caught</div></div>
+    <div><div class="n c">7</div><div class="l">detections written</div></div>
+    <div><div class="n c">4</div><div class="l">root-cause fixes · 1 IP blocked</div></div>
+  </div>
+  <div class="grid3" style="margin-top:34px">
+    <div class="card"><h3>End to end</h3><p class="muted">attack seen → scored → grounded → blocked, with the proxy enforcing 403s on the attacker, no human touch.</p></div>
+    <div class="card"><h3>Fully evidenced</h3><p class="muted">every detection row carries its flow ids, model, cited docs and latency — queryable in ClickHouse.</p></div>
+    <div class="card"><h3>Graceful</h3><p class="muted">each sponsor lane is optional; unset a key and Parry degrades, never breaks.</p></div>
+  </div>
+</section>
+
+<!-- 13 CLOSE -->
+<section class="slide" data-n="13">
+  <div class="kick">Stack &amp; what's next</div>
+  <h2>Parry — autonomous defense, with receipts</h2>
+  <div class="row">
+    <div class="col">
+      <h3>Built with</h3>
+      <p class="flow">ClickHouse Cloud · Akash (Console API, GPU) · Semgrep (Guardian) · Senso · Guild · mitmproxy · Flask · Python</p>
+      <h3 style="margin-top:22px">What's next</h3>
+      <ul><li>more detectors = more SQL, zero new infra</li><li>auto-PR the Semgrep fix on every critical</li><li>multi-tenant: one ClickHouse, per-app enclaves</li><li>replay mode: grade the agent on historical incidents</li></ul>
+    </div>
+    <div class="col" style="text-align:center">
+      <img class="shot" src="dashboard.png" alt="dashboard" style="max-height:52vh">
+    </div>
+  </div>
+  <p class="big" style="margin-top:24px">It sees the attack. It understands it. It stops it. And it shows you exactly why.</p>
+</section>
+
+</div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];let i=0;
+slides.forEach((s,k)=>s.setAttribute('data-n',`${k+1} / ${slides.length}`));
+function go(n){i=Math.max(0,Math.min(slides.length-1,n));slides[i].scrollIntoView({behavior:'smooth'});}
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'||e.key==='PageDown'||e.key===' '){e.preventDefault();go(i+1);}
+  if(e.key==='ArrowUp'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+  if(e.key==='Home')go(0); if(e.key==='End')go(slides.length-1);
+});
+const deck=document.querySelector('.deck');
+deck.addEventListener('scroll',()=>{i=Math.round(deck.scrollTop/innerHeight);});
+</script>
+</body></html>

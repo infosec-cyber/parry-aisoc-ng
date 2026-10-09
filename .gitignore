@@ -1,0 +1,21 @@
+# secrets & runtime
+.env
+.env.runtime
+.env.local
+*.key
+# ephemeral state
+.state/
+akash/.dseq
+akash/.uri
+akash/.provider
+akash/.llm_url
+akash/.llm_model
+# python / build
+__pycache__/
+*.pyc
+*.pyo
+# data
+*.db
+clickhouse/ch-data/
+# os
+.DS_Store

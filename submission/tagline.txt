@@ -1,0 +1,1 @@
+Parry is an autonomous AI SOC for web apps. It watches every HTTP request, detects live attacks as SQL over ClickHouse, triages and patches them with an LLM on Akash GPUs, blocks the attacker, rotates exposed secrets, and writes its own detection rules — no human in the loop.

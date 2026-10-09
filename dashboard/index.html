@@ -1,0 +1,398 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Parry · AI AppSec SOC</title>
+<style>
+:root{
+  --bg:#0a0e14;--panel:#121820;--panel2:#0f141b;--line:#1f2730;--txt:#e6edf3;--muted:#8b97a7;
+  --accent:#4c8dff;--ok:#2fb344;
+  --critical:#ff4d6d;--high:#ff8c42;--medium:#ffcf33;--low:#4dabf7;--info:#8b97a7;
+  --ch:#ffd23f;--akash:#ff5c4d;--semgrep:#17b890;--senso:#b36bff;--guild:#4db5ff;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.55 -apple-system,Segoe UI,Roboto,sans-serif}
+header{display:flex;align-items:center;gap:20px;padding:12px 22px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#121820,#0d1218);position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:11px}
+.pulse{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(47,179,68,.6);animation:pl 1.6s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(47,179,68,.5)}70%{box-shadow:0 0 0 8px rgba(47,179,68,0)}100%{box-shadow:0 0 0 0 rgba(47,179,68,0)}}
+.logo{font-weight:800;font-size:19px;letter-spacing:.5px}.logo .p{color:var(--accent)}
+.sub{color:var(--muted);font-size:11px}
+nav{display:flex;gap:4px;margin-left:14px}
+.tab{font-size:13px;padding:7px 15px;border-radius:9px;color:var(--muted);cursor:pointer;border:1px solid transparent;user-select:none}
+.tab:hover{color:var(--txt);background:#161d26}
+.tab.active{color:#fff;background:rgba(76,141,255,.14);border-color:#2a4a86}
+.lanes{margin-left:auto;display:flex;gap:7px}
+.lane{font-size:11px;padding:4px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted);display:flex;align-items:center;gap:6px}
+.lane.on{color:var(--txt);border-color:#2a6b3a;background:rgba(47,179,68,.08)}
+.lane .d{width:7px;height:7px;border-radius:50%;background:#3a434e}.lane.on .d{background:var(--ok)}
+.clock{font:12px var(--mono);color:var(--muted)}
+.page{display:none}.page.active{display:block}
+/* ---------- shared ---------- */
+.kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;padding:18px 22px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi .n{font-size:30px;font-weight:800;font-family:var(--mono)}
+.kpi .l{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.6px}
+.kpi.alert .n{color:var(--critical)}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;padding:0 22px 22px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.card h2{margin:0;padding:12px 16px;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+.body{max-height:360px;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:8px 16px;text-align:left;border-bottom:1px solid var(--panel2);white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;position:sticky;top:0;background:var(--panel)}
+.mono{font-family:var(--mono)}
+.badge{display:inline-block;padding:2px 9px;border-radius:5px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.critical{background:rgba(255,77,109,.16);color:var(--critical)}
+.high{background:rgba(255,140,66,.16);color:var(--high)}
+.medium{background:rgba(255,207,51,.16);color:var(--medium)}
+.low{background:rgba(77,171,247,.16);color:var(--low)}
+.info{background:rgba(139,151,167,.16);color:var(--info)}
+.st2{color:var(--ok)}.st4{color:var(--high)}.st5{color:var(--critical)}
+.det{padding:12px 16px;border-bottom:1px solid var(--panel2)}
+.det .top{display:flex;align-items:center;gap:10px}
+.det .tech{font-weight:700;font-family:var(--mono)}
+.det .meta{margin-left:auto;color:var(--muted);font-size:11px;font-family:var(--mono)}
+.det .narr{color:#c4cedb;font-size:13px;margin-top:6px}
+.det .tags{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.att{font:10px var(--mono);color:#ffb38a;border:1px solid #5a3420;background:rgba(255,140,66,.08);border-radius:4px;padding:1px 6px;margin-left:8px}
+.conf{font:10px var(--mono);color:#8fb7ff;border:1px solid #28406b;border-radius:4px;padding:1px 6px}
+.chain{display:flex;gap:6px;padding:14px 16px;flex-wrap:wrap}
+.step{flex:1;min-width:64px;text-align:center;padding:9px 4px;border-radius:8px;border:1px solid var(--line);font-size:11px;color:var(--muted);background:var(--panel2)}
+.step.hit{color:#fff;border-color:var(--critical);background:rgba(255,77,109,.14)}
+.step .i{font-size:15px;display:block;margin-bottom:3px}
+.chart{display:flex;align-items:flex-end;gap:3px;height:90px;padding:14px 16px}
+.bar{flex:1;background:linear-gradient(180deg,var(--accent),#2a5fb0);border-radius:3px 3px 0 0;min-height:2px}
+.empty{padding:26px;text-align:center;color:var(--muted)}
+.fix{padding:9px 16px;border-bottom:1px solid var(--panel2);font-size:12px}
+.fix .r{color:var(--high);font-family:var(--mono)}
+.patch{margin:7px 0 2px;padding:9px 11px;background:#06250f;border:1px solid #124a22;border-radius:7px;color:#7ee2a6;font:11.5px/1.45 var(--mono);white-space:pre-wrap;max-height:150px;overflow:auto}
+.ir{padding:16px 20px;color:#dbe6f2;font-size:15px;line-height:1.6}
+.lrule{padding:10px 16px;border-bottom:1px solid var(--panel2)}
+.lrule .nm{font-weight:700;color:#b98bff}.lrule .tech{font:11px var(--mono);color:var(--muted);margin-left:8px}
+.lrule .rat{color:#c4cedb;font-size:12px;margin:3px 0}
+.lrule .sql{margin-top:5px;padding:7px 10px;background:#1a1226;border:1px solid #3a2a55;border-radius:6px;color:#cbb6f0;font:11px/1.4 var(--mono);white-space:pre-wrap;max-height:90px;overflow:auto}
+.rot{padding:9px 16px;border-bottom:1px solid var(--panel2);font:12px var(--mono)}
+.rot .ty{color:#ffd23f;font-weight:700}.rot .ar{color:var(--muted)}.rot .nw{color:#7ee2a6}
+.fprow{display:flex;gap:8px;flex-wrap:wrap;margin:5px 0}
+.fpok{font:11px var(--mono);color:#7ee2a6;border:1px solid #1d5236;background:rgba(47,179,68,.08);border-radius:5px;padding:2px 8px}
+.fpwarn{font:11px var(--mono);color:#ffcf33;border:1px solid #5a4e18;background:rgba(255,207,51,.08);border-radius:5px;padding:2px 8px}
+.vphold{font:11px var(--mono);color:#8fb7ff;border:1px solid #28406b;border-radius:5px;padding:2px 8px}
+.vpret{font:11px var(--mono);color:#7ee2a6;border:1px solid #1d5236;border-radius:5px;padding:2px 8px}
+.fixbtn{font:11px var(--mono);padding:4px 10px;border-radius:7px;border:1px solid #2a6b3a;background:rgba(47,179,68,.1);color:#7ee2a6;cursor:pointer}
+/* ---------- pipeline page ---------- */
+.wrap{padding:26px 36px;max-width:1500px;margin:0 auto}
+.phdr{font-size:24px;font-weight:800;letter-spacing:-.4px;margin:0 0 4px}
+.psub{color:var(--muted);margin:0 0 24px;font-size:15px}
+.flowgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:stretch}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;position:relative;margin-right:22px}
+.stage{margin-right:0}
+.stage .num{font:11px var(--mono);color:var(--muted)}
+.stage .nm{font-size:16px;font-weight:800;margin:3px 0 10px}
+.spn{display:inline-block;font:10px var(--mono);padding:2px 7px;border-radius:12px;margin:0 4px 6px 0;border:1px solid}
+.spn.ch{color:var(--ch);border-color:#5a4e18;background:rgba(255,210,63,.08)}
+.spn.akash{color:#ff8a7d;border-color:#5a2a24;background:rgba(255,92,77,.08)}
+.spn.semgrep{color:#2ad0a6;border-color:#174a3b;background:rgba(23,184,144,.08)}
+.spn.senso{color:#c38cff;border-color:#3d2a5a;background:rgba(179,107,255,.08)}
+.spn.guild{color:#7ccaff;border-color:#243f5a;background:rgba(77,181,255,.08)}
+.spn.infra{color:var(--muted);border-color:var(--line)}
+.wh{font-size:12px;margin-top:9px}.wh b{color:#aeb9c7;font-weight:700;display:block;font-size:10px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
+.wh p{margin:0 0 9px;color:#cdd8e4}
+/* ---------- sponsors page ---------- */
+.spgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.scard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0;overflow:hidden}
+.scard .sh{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+.scard .sh .ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800}
+.scard .sh .nm{font-size:18px;font-weight:800}
+.scard .sh .tl{color:var(--muted);font-size:12px}
+.scard .sh .stat{margin-left:auto;font:11px var(--mono);padding:4px 10px;border-radius:20px}
+.stat.on{color:var(--ok);background:rgba(47,179,68,.1);border:1px solid #2a6b3a}
+.stat.off{color:var(--muted);background:#161d26;border:1px solid var(--line)}
+.sbody{padding:16px 20px;display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+.sbody h4{margin:0 0 7px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.sbody ul{margin:0 0 12px;padding-left:0;list-style:none}
+.sbody li{padding:3px 0 3px 18px;position:relative;color:#cdd8e4;font-size:13px}
+.sbody li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+.when{color:#c7d2de;font-size:13px;background:#0d1420;border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+.metrics{display:flex;flex-direction:column;gap:8px}
+.metric{display:flex;justify-content:space-between;font-size:13px;border-bottom:1px solid var(--panel2);padding-bottom:6px}
+.metric .k{color:var(--muted)}.metric .v{font-family:var(--mono);color:#fff}
+.why{color:#c7d2de;font-size:13px;background:#0d1420;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:9px 12px;margin-bottom:12px}
+.proof{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.proof h4{color:#2ad0a6}
+.pf{font:11px var(--mono);color:#c4cedb;padding:6px 10px;background:#0c1420;border:1px solid var(--line);border-radius:6px;margin-bottom:6px}
+.pf .s{color:var(--muted)} .pf b{color:#fff}
+.ptab{width:100%;border-collapse:collapse;font:11px var(--mono)}
+.ptab td{padding:3px 8px;border-bottom:1px solid var(--panel2)}.ptab .r{color:#fff;text-align:right}
+.ctl{display:flex;align-items:center;gap:12px;padding:16px 36px;border-bottom:1px solid var(--line);background:#0d1218;position:sticky;top:56px;z-index:10;flex-wrap:wrap}
+.btn{font-size:13px;font-weight:600;padding:9px 16px;border-radius:9px;cursor:pointer;border:1px solid var(--line);background:#161d26;color:var(--txt)}
+.btn:hover{border-color:#3a4654}
+.btn.go{background:linear-gradient(180deg,#ff5c6b,#d8384a);border-color:#ff5c6b;color:#fff}
+.btn.go:hover{filter:brightness(1.08)}
+.btn.rst{color:var(--muted)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.rstat{font:12px var(--mono);padding:5px 12px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+.rstat.run{color:#ff8a98;border-color:#5a2a30;background:rgba(255,77,109,.1)}
+.rstat.idle{color:var(--ok);border-color:#2a6b3a;background:rgba(47,179,68,.08)}
+.ctl .sp{margin-left:auto;display:flex;gap:22px}
+.ctl .sp b{font:800 20px var(--mono)}.ctl .sp span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-left:6px}
+.sel{font-size:13px;padding:8px 12px;border-radius:9px;background:#161d26;color:var(--txt);border:1px solid var(--line)}
+.pace{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.pace div{padding:8px 13px;font-size:12px;cursor:pointer;color:var(--muted)}
+.pace div.on{background:rgba(76,141,255,.16);color:#fff}
+.ctl2{display:flex;align-items:center;gap:8px;padding:10px 36px;border-bottom:1px solid var(--line);background:#0b1016;flex-wrap:wrap;position:sticky;top:110px;z-index:9}
+.ctl2 .lab{font:11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-right:4px}
+.chip{font:11px var(--mono);padding:5px 11px;border-radius:20px;border:1px solid var(--line);color:var(--muted);cursor:pointer;user-select:none}
+.chip.on{color:#fff;border-color:#ff5c6b;background:rgba(255,77,109,.12)}
+.battle{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;padding:16px 22px}
+.bcol{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;height:calc(100vh - 190px)}
+.bcol .bh{padding:12px 16px;font-size:13px;font-weight:800;letter-spacing:.3px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.bcol.red .bh{color:#ff8a98;background:rgba(255,77,109,.07)}
+.bcol.ch .bh{color:var(--ch);background:rgba(255,210,63,.06)}
+.bcol.blue .bh{color:#7ab0ff;background:rgba(76,141,255,.07)}
+.bcol .bb{overflow:auto;flex:1;padding:4px 0}
+.logline{font:12px/1.5 var(--mono);padding:3px 14px;color:#c9d4e0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logline .s{color:#ff8a98}
+.flowrow{display:flex;gap:10px;font:12px var(--mono);padding:5px 14px;border-bottom:1px solid var(--panel2)}
+.flowrow .m{color:var(--muted);width:60px}.flowrow .p{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bminichain{display:flex;flex-wrap:wrap;gap:4px;padding:10px 14px;border-bottom:1px solid var(--panel2)}
+.bstep{font:10px var(--mono);padding:3px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+.bstep.hit{color:#fff;border-color:var(--critical);background:rgba(255,77,109,.16)}
+.bdet{padding:9px 14px;border-bottom:1px solid var(--panel2)}
+.bdet .r{display:flex;align-items:center;gap:8px}
+.bdet .nr{color:#b9c5d2;font-size:12px;margin-top:4px}
+.bact{font:11.5px var(--mono);padding:6px 14px;border-bottom:1px solid var(--panel2);color:#9fe0b6}
+.deckframe{width:100%;height:calc(100vh - 56px);border:0;background:#05080c}
+</style></head>
+<body>
+<header>
+  <div class="brand"><div class="pulse"></div>
+    <div><div class="logo"><span class="p">PARRY</span> · AI AppSec SOC</div><div class="sub">autonomous application-security operations</div></div></div>
+  <nav id="nav">
+    <div class="tab active" data-p="live">🛡 Live SOC</div>
+    <div class="tab" data-p="attack">⚔ Battle</div>
+    <div class="tab" data-p="pipeline">🔀 How it works</div>
+    <div class="tab" data-p="sponsors">🧩 Sponsors</div>
+    <div class="tab" data-p="deck">📊 Deck</div>
+  </nav>
+  <div class="lanes" id="lanes"></div>
+  <div class="clock" id="clock"></div>
+</header>
+
+<!-- ============ LIVE ============ -->
+<div class="page active" id="page-live">
+  <div class="kpis" id="kpis"></div>
+  <div style="padding:0 22px 14px"><div class="card"><h2>Attack kill chain <span id="chainpct"></span></h2><div class="chain" id="chain"></div></div></div>
+  <div style="padding:0 22px 14px"><div class="card" id="ircard" style="display:none;border-left:3px solid var(--accent)"><h2>🧠 AI incident report <span class="mono" id="irmeta" style="color:var(--muted)"></span></h2><div class="ir" id="ir"></div></div></div>
+  <div style="padding:0 22px 14px"><div class="card" id="adcard" style="display:none;border-left:3px solid var(--senso)"><h2>🧬 Adaptive defense — auto-learned rules, FP-correlation &amp; secret rotation <span class="mono" id="admeta" style="color:var(--muted)"></span><button class="fixbtn" id="markfixed">✓ mark issue fixed → retire virtual patches</button></h2><div class="body" id="adbody"></div></div></div>
+  <div class="grid">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card"><h2>Detections <span class="mono" id="detc"></span></h2><div class="body" id="dets"></div></div>
+      <div class="card"><h2>Request rate (5s buckets)</h2><div class="chart" id="chart"></div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card"><h2>Live traffic <span class="mono">:8080 → target</span></h2><div class="body" id="traf"></div></div>
+      <div class="card"><h2>Autonomous response</h2><div class="body" id="mit"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PIPELINE ============ -->
+<div class="page" id="page-pipeline"><div class="wrap">
+  <h1 class="phdr">How Parry works — one request, end to end</h1>
+  <p class="psub">The data problem: a busy app emits <b>millions of HTTP events a day</b>. You can't LLM-scan every request — it's too slow and too costly. Parry's answer: parse every request into structured rows, let <b>ClickHouse</b> do detection as SQL at scale in milliseconds, and spend the LLM only on the handful of events that already look like an attack. Each stage below names the sponsor, <b>what</b> it does, <b>how</b> we use it, and <b>when</b> it fires.</p>
+  <div class="flowgrid" id="flow"></div>
+  <p class="psub" style="margin-top:26px">Every lane is optional — unset a key and Parry degrades to the lanes that remain, never breaks.</p>
+</div></div>
+
+<!-- ============ SPONSORS ============ -->
+<div class="page" id="page-sponsors"><div class="wrap">
+  <h1 class="phdr">The sponsor stack</h1>
+  <p class="psub">Live status pulled from the running system. Each card: what it is, how Parry uses it, when it fires, and live numbers.</p>
+  <div class="spgrid" id="spgrid"></div>
+</div></div>
+
+<!-- ============ BATTLE ============ -->
+<div class="page" id="page-attack">
+  <div class="ctl">
+    <select class="sel" id="scenario"></select>
+    <div class="pace" id="pace"><div data-v="slow">🐢 Slow</div><div data-v="normal" class="on">▶ Normal</div><div data-v="fast">⚡ Fast</div></div>
+    <button class="btn go" id="atk">Launch attack</button>
+    <button class="btn rst" id="atkreset">↺ Reset board</button>
+    <span class="rstat idle" id="rstat">● idle</span>
+    <div class="sp"><div><b id="be">0</b><span>events</span></div><div><b id="bd">0</b><span>detections</span></div><div><b id="bb">0</b><span>blocked</span></div></div>
+  </div>
+  <div class="ctl2"><span class="lab">build custom attack:</span><span id="chips"></span><button class="btn" id="atkcustom">▶ Launch custom</button></div>
+  <div class="battle">
+    <div class="bcol red"><div class="bh">🔴 Attacker agent <span style="color:var(--muted);font-weight:400;font-size:11px">· 8-stage kill chain</span></div>
+      <div class="bminichain" id="bchain"></div><div class="bb" id="blog"><div class="empty">Press ▶ to launch an attack.</div></div></div>
+    <div class="bcol ch"><div class="bh">⬢ ClickHouse telemetry <span style="color:var(--muted);font-weight:400;font-size:11px">· flows landing live</span></div>
+      <div class="bb" id="bflows"><div class="empty">no traffic yet</div></div></div>
+    <div class="bcol blue"><div class="bh">🔵 Blue team · Parry <span style="color:var(--muted);font-weight:400;font-size:11px">· detect → triage → respond</span></div>
+      <div class="bb" id="bblue"><div class="empty">watching…</div></div></div>
+  </div>
+</div>
+
+<!-- ============ DECK ============ -->
+<div class="page" id="page-deck"><iframe class="deckframe" src="/slides/parry-deck.html"></iframe></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=t=>(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+async function j(u){try{return await (await fetch(u)).json()}catch(e){return null}}
+const ICON={"recon-scan":"🔍","bruteforce":"🔑","sqli-probe":"💉","sqli-dump":"🗄️","idor-enum":"🔓","bac-admin":"👑","cmdinj":"⚡","exfil-canary":"📤"};
+
+/* ---- nav ---- */
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active'); $('page-'+t.dataset.p).classList.add('active');
+  if(t.dataset.p==='sponsors')renderSponsors();
+});
+setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString()},1000);
+
+/* ---- static content: pipeline + sponsor descriptions ---- */
+const FLOW=[
+ {num:"01",nm:"Parse",spn:[["infra","mitmproxy + ch_sink"]],what:"What reads the traffic: an inline reverse proxy parses every HTTP request AND response into one structured row — method, path, query, headers, body snippet, status, latency, cookie-derived session, and the real client IP from X-Forwarded-For.",how:"A mitmproxy addon serializes each flow and streams it to ClickHouse; the same addon enforces blocks (returns 403).",when:"Every single request, always-on — this is the sensor."},
+ {num:"02",nm:"Store at scale",spn:[["ch","ClickHouse Cloud"]],what:"The data problem solved: millions of events/day land in a columnar store that stays fast. Materialized views pre-aggregate rate & auth pressure at ingest, so queries scan state, not raw rows.",how:"Host mirror syncs flows to ClickHouse Cloud on :443; MVs (AggregatingMergeTree) keep per-source rollups current. We measure ~10x compression and sub-20ms queries.",when:"Continuously, ~1s after each request."},
+ {num:"03",nm:"Detect → trigger",spn:[["ch","ClickHouse SQL"]],what:"How we detect in the first place: 8 detection rules are plain SQL with thresholds (e.g. ≥8 distinct paths with 404s = recon; a UNION 200 = sqli-dump). When a rule crosses its threshold, that IS the trigger that wakes the SOC loop.",how:"The blue agent runs every rule over the live Cloud tables every 2s; a returned row is a candidate detection.",when:"Every 2s; fires the instant an attack pattern appears."},
+ {num:"04",nm:"Triage",spn:[["akash","Akash GPU LLM"]],what:"Only now does an LLM get involved — on the few events that already matched a rule. It scores severity, writes the analyst summary, and later the patch and incident report.",how:"OpenAI-compatible qwen2.5 on an Akash A100 (Console API) returns JSON {severity, confidence, summary}.",when:"On each candidate detection, ~0.5s warm — never on normal traffic."},
+ {num:"05",nm:"Ground",spn:[["senso","Senso"]],what:"Backs each decision with the verified response playbook, cited by document id — no hallucinated response steps.",how:"Queries the Senso knowledge base; stores the cited doc ids on the detection (grounded_by).",when:"On every detection."},
+ {num:"06",nm:"Respond + kick off fix",spn:[["ch","block"],["semgrep","Semgrep"],["akash","LLM patch"],["guild","Guild"]],what:"Blocks the attacker IP, and KICKS OFF THE FIX: Semgrep pins the vulnerable line and the Akash LLM writes a secure patch (the remediation to deploy). Guild's commander agent adjudicates criticals.",how:"Writes a blocklist row (proxy enforces 403); files a root-cause fix; composes the incident report; opens the remediation.",when:"On high/critical detections."},
+ {num:"07",nm:"Learn, correlate & hold",spn:[["ch","learned rule"],["akash","names it"]],what:"Generates a new detection rule from the exploit's indicators, then CORRELATES it against real legitimate traffic so it can never deny service. It stays as a virtual patch — holding the line — until the code fix is deployed, then retires.",how:"The rule is validated SQL, run over a 15-min baseline of real user traffic; 0 false positives ⇒ safe to enforce. status=holding until you mark the issue fixed.",when:"The first time an exploit succeeds; retired when the root cause is patched."},
+];
+const SPONSORS={
+ ClickHouse:{ic:"⬢",color:"--ch",tag:"Real-time analytics database (Cloud)",why:"Attacks are patterns in an event stream. A columnar SQL engine turns detection into a query you write in seconds and run over millions of rows in milliseconds — storage, real-time analytics and BI in one system.",use:["Detection IS a SQL query — 8 rules, add one with a SELECT","Materialized views (AggregatingMergeTree) pre-aggregate at ingest","Stores flows, detections, blocklist, fixes — one source of truth","Powers both this UI and a native ClickHouse dashboard"],when:"Every request (store) and every 2s (detect). Always-on, the backbone."},
+ Akash:{ic:"▲",color:"--akash",tag:"Decentralized GPU compute marketplace",why:"Autonomous defense needs cheap, on-demand GPU inference. Akash gives us an A100 for ~$1/hr from credits, deployed by API in minutes — hyperscaler performance without the lock-in or the bill.",use:["A100 GPU rented via the new Console API (managed wallet, auto-funding, runtime cap)","Serves qwen2.5 as an OpenAI-compatible endpoint","One model does three jobs: triage, code-patch, incident report"],when:"On every detection (triage) and every high/critical (patch + report)."},
+ Semgrep:{ic:"⬡",color:"--semgrep",tag:"Static analysis / AppSec platform",why:"An alert is only half the job — the fix needs the exact line. Semgrep's precise static analysis turns 'something is wrong' into 'app.py:123, CWE-89' that the LLM can patch.",use:["Custom rules for the app's vuln classes (SQLi, cmd-inj, IDOR, authz)","Turns a detection into the exact vulnerable file:line","Authenticated to Guardian (deployment rotemb-appsec)"],when:"On high/critical detections — the root-cause step before the LLM patch."},
+ Senso:{ic:"◆",color:"--senso",tag:"Knowledge base for grounding",why:"An autonomous agent must not hallucinate response steps. Senso gives every decision a cited, verified source, and surfaces what it cannot ground as a coverage gap.",use:["Holds verified response playbooks & asset inventory","Triage cites the doc ids it used (grounded_by)","Un-groundable alerts surface as a coverage backlog"],when:"On every detection, as the grounding step."},
+ Guild:{ic:"◇",color:"--guild",tag:"Hosted agent control plane",why:"Autonomous blocking needs an accountable decision layer. Guild runs the commander agent off-box with tamper-evident session logs — the audit trail a real SOC requires.",use:["A SOC-commander agent adjudicates every critical","Confirm/downgrade, approve/veto the block, CISO summary","Session logs = tamper-evident audit trail"],when:"On critical detections, as the human-accountable decision layer."},
+};
+function renderFlow(){
+  $('flow').innerHTML=FLOW.map(s=>`<div class="stage"><div class="num">${s.num}</div><div class="nm">${s.nm}</div>
+    <div>${s.spn.map(([c,n])=>`<span class="spn ${c}">${n}</span>`).join('')}</div>
+    <div class="wh"><b>What</b><p>${s.what}</p><b>How</b><p>${s.how}</p><b>When</b><p>${s.when}</p></div></div>`).join('');
+}
+async function proofHTML(name){
+  try{
+    if(name==="Senso"){const d=await j('/api/senso');if(!d||!d.passages||!d.passages.length)return `<div class="pf s">no grounded passages yet — run an attack</div>`;
+      return `<div class="pf s">query: "${esc(d.query)}" · ${d.grounded_detections} grounded detections</div>`+d.passages.map(p=>`<div class="pf"><b>${esc(p.title||'doc')}</b> <span class="s">score ${p.score} · ${(p.content_id||'').slice(0,8)}</span><br>${esc(p.text)}</div>`).join('');}
+    if(name==="Semgrep"){const d=await j('/api/semgrep');let h=(d.rules||[]).map(r=>`<div class="pf"><b>${esc(r.id)}</b> <span class="s">${esc(r.cwe)}</span></div>`).join('');
+      if(d.fixes&&d.fixes.length)h+=`<div class="pf s" style="margin-top:4px">latest root-cause: ${esc(d.fixes[0].semgrep_rule)} → ${esc(d.fixes[0].file)}:${d.fixes[0].line}</div>`;return h;}
+    if(name==="ClickHouse"){const d=await j('/api/chstats');let h=`<div class="pf s">${d.queries_1h} queries in last hour · avg ${d.avg_query_ms} ms</div><table class="ptab"><tr><td class="s">table</td><td class="s r">rows</td><td class="s r">on-disk</td><td class="s r">compression</td></tr>`;
+      h+=(d.tables||[]).filter(t=>!t.table.startsWith('.inner')).map(t=>`<tr><td>${esc(t.table)}</td><td class="r">${t.rows}</td><td class="r">${t.compressed}</td><td class="r">${t.ratio}x</td></tr>`).join('');return h+`</table>`;}
+    if(name==="Akash"){return `<div class="pf s">triage narratives &amp; AI patches are visible on the Live SOC page (model tag akash:qwen2.5:3b).</div>`;}
+    if(name==="Guild"){return `<div class="pf s">Commander adjudication appears under Autonomous response when a critical fires and the lane is live.</div>`;}
+  }catch(e){}
+  return "";
+}
+async function renderSponsors(){
+  const live=await j('/api/sponsors')||{};
+  const cards=await Promise.all(Object.entries(SPONSORS).map(async ([name,s])=>{
+    const L=live[name]||{on:false,metrics:{}};
+    const mrows=Object.entries(L.metrics||{}).map(([k,v])=>`<div class="metric"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+    const proof=await proofHTML(name);
+    return `<div class="scard"><div class="sh">
+      <div class="ic" style="background:rgba(255,255,255,.04);color:var(${s.color})">${s.ic}</div>
+      <div><div class="nm">${name}</div><div class="tl">${s.tag}</div></div>
+      <div class="stat ${L.on?'on':'off'}">${L.on?'● live':'○ ready'}</div></div>
+      <div class="sbody">
+        <div><h4>Why it is a fit</h4><div class="why">${s.why}</div>
+          <h4>How Parry uses it</h4><ul>${s.use.map(u=>`<li>${u}</li>`).join('')}</ul>
+          <h4>When it fires</h4><div class="when">${s.when}</div></div>
+        <div><h4>Live${L.host?' · '+L.host:''}</h4><div class="metrics">${mrows||''}</div>
+          <div class="proof"><h4>Proof — live data</h4>${proof||'<div class="pf s">—</div>'}</div></div>
+      </div></div>`;
+  }));
+  $('spgrid').innerHTML=cards.join('');
+}
+renderFlow();
+
+/* ---- live page poller ---- */
+async function tick(){
+  if(!$('page-live').classList.contains('active'))return;
+  const s=await j('/api/stats'); if(s){
+    $('lanes').innerHTML=Object.entries(s.lanes).map(([k,v])=>`<div class="lane ${v?'on':''}"><span class="d"></span>${k}</div>`).join('');
+    $('kpis').innerHTML=[['Events',s.events,''],['Attacker IPs',s.ips,''],['Detections',s.detections,s.detections?'alert':''],['IPs blocked',s.blocked,''],['Auto-fixes',s.fixes,''],['Rules learned',s.learned||0,''],['Secrets rotated',s.rotated||0,s.rotated?'alert':'']]
+      .map(([l,n,c])=>`<div class="kpi ${c}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+    const hits=s.chain.filter(c=>c.hit).length;
+    $('chainpct').textContent=`${hits}/${s.chain.length} techniques seen`;
+    $('chain').innerHTML=s.chain.map(c=>`<div class="step ${c.hit?'hit':''}"><span class="i">${ICON[c.stage]||'•'}</span>${c.stage}</div>`).join('');
+  }
+  const d=await j('/api/detections'); if(d){
+    $('detc').textContent=d.length?`${d.length} shown`:'';
+    $('dets').innerHTML=d.length?d.map(x=>`<div class="det"><div class="top">
+      <span class="badge ${x.severity}">${x.severity}</span><span class="tech">${x.technique}</span>${x.mitre?`<span class="att">${x.mitre.split(' (')[0]}</span>`:''}
+      <span class="meta">${x.model} · ${x.latency_ms}ms · ${x.t}</span></div>
+      <div class="narr">${(x.narrative||x.title||'').slice(0,240)}</div>
+      <div class="tags"><span class="tag">evidence: ${x.evidence} flows</span>${x.confidence?`<span class="conf">conf ${x.confidence}</span>`:''}${(x.grounded_by&&x.grounded_by.length)?`<span class="tag">📚 grounded: ${x.grounded_by.length} doc(s)</span>`:''}</div>
+      </div>`).join(''):'<div class="empty">No detections yet — run the red agent.</div>';
+  }
+  const t=await j('/api/traffic'); if(t){
+    $('traf').innerHTML='<table><tr><th>time</th><th>src</th><th>req</th><th>st</th></tr>'+
+      (t.length?t.map(r=>`<tr><td class="mono">${r.t}</td><td class="mono">${r.src_ip}</td><td class="mono">${r.method} ${r.path.slice(0,34)}</td><td class="mono st${(''+r.status)[0]}">${r.status}</td></tr>`).join(''):'<tr><td colspan=4 class="empty">waiting for traffic…</td></tr>')+'</table>';
+  }
+  const m=await j('/api/mitigations'); if(m){
+    let h='';
+    if(m.blocked&&m.blocked.length)h+='<table><tr><th>time</th><th>blocked IP</th><th>reason</th></tr>'+m.blocked.map(b=>`<tr><td class="mono">${b.t}</td><td class="mono" style="color:var(--critical)">⛔ ${b.src_ip}</td><td>${b.reason}</td></tr>`).join('')+'</table>';
+    if(m.fixes&&m.fixes.length)h+=m.fixes.map(f=>`<div class="fix">🔧 <span class="r">${f.semgrep_rule}</span> → ${f.file}:${f.line}${f.patch&&f.patch.length>3?`<div class="patch">${esc(f.patch)}</div>`:''}</div>`).join('');
+    if(m.commander&&m.commander.length)h+=m.commander.map(c=>`<div class="fix">🫡 <b>Guild commander:</b> ${(c.narrative||'').slice(0,200)}</div>`).join('');
+    $('mit').innerHTML=h||'<div class="empty">No mitigations yet.</div>';
+  }
+  const ir=await j('/api/incident'); const irc=$('ircard');
+  if(ir&&ir.narrative){irc.style.display='block';$('ir').innerHTML=esc(ir.narrative);$('irmeta').textContent=`${ir.model} · ${ir.t}`;}
+  const ad=await j('/api/adaptive'); const adc=$('adcard');
+  if(ad&&((ad.learned&&ad.learned.length)||(ad.rotations&&ad.rotations.length))){
+    adc.style.display='block';let H='';
+    if(ad.rotations&&ad.rotations.length)H+=ad.rotations.map(r=>`<div class="rot">🔄 <span class="ty">${r.secret_type}</span> rotated — <span class="ar">${esc(r.old_masked)}</span> → <span class="nw">${esc(r.new_masked)}</span></div>`).join('');
+    if(ad.learned&&ad.learned.length)H+=ad.learned.map(l=>{
+      const safe=(+l.enforce)?`<span class="fpok">✓ ${l.false_positives} false positives across ${l.baseline_checked} real requests — safe to enforce</span>`:`<span class="fpwarn">⚠ ${l.false_positives} legit matches — alert-only, won't block</span>`;
+      const vp=(l.status==='retired')?`<span class="vpret">✅ issue fixed — rule retired</span>`:`<span class="vphold">🛡 virtual patch · holding until ${esc(l.protects||'code fix deployed')}</span>`;
+      return `<div class="lrule"><span class="nm">🧬 ${esc(l.name)}</span><span class="tech">${l.technique}</span><div class="rat">${esc(l.rationale)}</div><div class="fprow">${safe} ${vp}</div><div class="sql">${esc(l.sql)}</div></div>`;}).join('');
+    const held=(ad.learned||[]).filter(l=>l.status!=='retired').length;
+    $('adbody').innerHTML=H;$('admeta').textContent=`${(ad.learned||[]).length} rules (${held} holding) · ${(ad.rotations||[]).length} rotations`;
+  }
+  const c=await j('/api/ratechart'); if(c&&c.length){
+    const mx=Math.max(...c.map(x=>+x.reqs),1);
+    $('chart').innerHTML=c.slice().reverse().map(x=>`<div class="bar" style="height:${Math.round(+x.reqs/mx*100)}%" title="${x.t}: ${x.reqs}"></div>`).join('');
+  }
+}
+
+/* ---- battle page ---- */
+async function post(u){try{return await (await fetch(u,{method:"POST"})).json()}catch(e){return null}}
+const SCENARIOS={"Full kill chain":"","Recon sweep":"recon","Credential stuffing":"recon,brute","SQL injection":"brute,sqli","IDOR data theft":"brute,idor,exfil","Privilege escalation":"brute,sqli,privesc,bac","Command injection":"brute,cmdinj","Data exfiltration":"brute,idor,bac,cmdinj,exfil"};
+const STAGELIST=["recon","brute","sqli","idor","bac","privesc","cmdinj","exfil"];
+let PACE="normal";
+$('scenario').innerHTML=Object.keys(SCENARIOS).map(k=>`<option value="${SCENARIOS[k]}">${k}</option>`).join('');
+$('chips').innerHTML=STAGELIST.map(st=>`<span class="chip" data-s="${st}">${st}</span>`).join('');
+document.querySelectorAll('#chips .chip').forEach(c=>c.onclick=()=>c.classList.toggle('on'));
+document.querySelectorAll('#pace div').forEach(d=>d.onclick=()=>{document.querySelectorAll('#pace div').forEach(x=>x.classList.remove('on'));d.classList.add('on');PACE=d.dataset.v;});
+$('atk').onclick=async()=>{$('blog').innerHTML='<div class="logline">launching…</div>';await post(`/api/attack/start?pace=${PACE}&stages=${encodeURIComponent($('scenario').value)}`);};
+$('atkcustom').onclick=async()=>{const st=[...document.querySelectorAll('#chips .chip.on')].map(c=>c.dataset.s).join(',');if(!st){$('blog').innerHTML='<div class="empty">pick at least one stage above.</div>';return;}$('blog').innerHTML='<div class="logline">launching custom…</div>';await post(`/api/attack/start?pace=${PACE}&stages=${st}`);};
+$('atkreset').onclick=async()=>{await post('/api/attack/reset');$('blog').innerHTML='<div class="empty">board reset — pick a scenario and launch.</div>';$('bflows').innerHTML='<div class="empty">no traffic yet</div>';$('bblue').innerHTML='<div class="empty">watching…</div>';};
+async function battle(){
+  if(!$('page-attack').classList.contains('active'))return;
+  const st=await j('/api/attack/status');
+  if(st){const r=$('rstat');r.className='rstat '+(st.running?'run':'idle');r.textContent=st.running?'● attack running':'● idle';
+    $('atk').disabled=st.running;$('atkfast').disabled=st.running;
+    if(st.lines&&st.lines.length){$('blog').innerHTML=st.lines.map(l=>{const m=l.match(/^\[red:?([a-z]*)\]\s*(.*)$/);return `<div class="logline">${m?`<span class="s">${m[1]||'red'}</span> ${esc(m[2])}`:esc(l)}</div>`;}).join('');const b=$('blog');b.scrollTop=b.scrollHeight;}
+  }
+  const s=await j('/api/stats'); if(s){$('be').textContent=s.events;$('bd').textContent=s.detections;$('bb').textContent=s.blocked;
+    $('bchain').innerHTML=s.chain.map(c=>`<span class="bstep ${c.hit?'hit':''}">${ICON[c.stage]||''} ${c.stage}</span>`).join('');}
+  const t=await j('/api/traffic'); if(t){$('bflows').innerHTML=t.length?t.map(r=>`<div class="flowrow"><span class="m st${(''+r.status)[0]}">${r.method}</span><span class="p">${esc(r.path)}</span><span class="st${(''+r.status)[0]}">${r.status}</span></div>`).join(''):'<div class="empty">no traffic yet</div>';}
+  const d=await j('/api/detections'); const m=await j('/api/mitigations');
+  let h='';
+  if(d&&d.length)h+=d.map(x=>`<div class="bdet"><div class="r"><span class="badge ${x.severity}">${x.severity}</span><span class="mono" style="font-weight:700">${x.technique}</span>${x.mitre?`<span class="att">${x.mitre.split(' (')[0]}</span>`:''}</div><div class="nr">${esc((x.narrative||'').slice(0,150))}</div></div>`).join('');
+  const ad2=await j('/api/adaptive');let pre='';
+  if(ad2){if(ad2.rotations)pre+=ad2.rotations.map(r=>`<div class="bact" style="color:#ffd23f">🔄 rotated ${r.secret_type} — ${esc(r.new_masked)}</div>`).join('');
+          if(ad2.learned)pre+=ad2.learned.map(l=>`<div class="bact" style="color:#c38cff">🧬 learned rule: ${esc(l.name)} [${l.technique}]</div>`).join('');}
+  h=pre+h;
+  if(m){if(m.blocked&&m.blocked.length)h=m.blocked.map(b=>`<div class="bact" style="color:#ff8a98">⛔ blocked ${b.src_ip} — ${b.reason}</div>`).join('')+h;
+        if(m.fixes&&m.fixes.length)h+=m.fixes.map(f=>`<div class="bact">🔧 ${f.semgrep_rule} → ${f.file}:${f.line}</div>`).join('');}
+  $('bblue').innerHTML=h||'<div class="empty">watching…</div>';
+}
+setInterval(battle,1500);
+
+const mf=document.getElementById('markfixed'); if(mf) mf.onclick=async()=>{await fetch('/api/remediate',{method:'POST'});};
+tick(); setInterval(tick,2000);
+</script>
+</body></html>

@@ -1,0 +1,38 @@
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: parry-clickhouse
+    ports:
+      - "8123:8123"   # HTTP
+      - "9000:9000"   # native
+    environment:
+      CLICKHOUSE_DB: parry
+      CLICKHOUSE_USER: parry
+      CLICKHOUSE_PASSWORD: parry-local
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - ./clickhouse/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+      - ch-data:/var/lib/clickhouse
+    ulimits:
+      nofile: { soft: 262144, hard: 262144 }
+
+  target:
+    build: ./target-app
+    container_name: parry-target
+    ports:
+      - "5000:5000"
+
+  proxy:
+    image: mitmproxy/mitmproxy:latest
+    container_name: parry-proxy
+    command: mitmdump --mode reverse:http://target:5000 -p 8080 -s /addons/ch_sink.py
+    ports:
+      - "8080:8080"   # red agent attacks THIS port
+    volumes:
+      - ./pipeline:/addons:ro
+    environment:
+      CLICKHOUSE_URL: http://parry:parry-local@clickhouse:8123
+    depends_on: [clickhouse, target]
+
+volumes:
+  ch-data:

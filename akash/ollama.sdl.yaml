@@ -1,0 +1,38 @@
+version: "2.0"
+services:
+  ollama:
+    image: ollama/ollama:0.5.11
+    expose:
+      - port: 11434
+        as: 80
+        to:
+          - global: true
+    env:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_KEEP_ALIVE=24h
+    command:
+      - bash
+      - -c
+    args:
+      - "ollama serve & sleep 6; ollama pull qwen2.5:3b-instruct; wait"
+profiles:
+  compute:
+    ollama:
+      resources:
+        cpu:
+          units: 2.0
+        memory:
+          size: 8Gi
+        storage:
+          size: 16Gi
+  placement:
+    dcloud:
+      pricing:
+        ollama:
+          denom: uakt
+          amount: 100000
+deployment:
+  ollama:
+    dcloud:
+      profile: ollama
+      count: 1

@@ -1,0 +1,42 @@
+# Parry — detection rules for the NoteNest demo target's vulnerability classes.
+# Kept deliberately small and self-contained so the blue agent's root-cause lane
+# runs offline in <2s. Pro/registry rules (p/flask) are opt-in via SEMGREP_PRO_RULES=1.
+rules:
+  - id: formatted-sql-query
+    message: "SQL query built with %-string formatting from user input — SQL injection."
+    severity: ERROR
+    languages: [python]
+    pattern: |
+      $SQL = "..." % ...
+      ...
+      $DB.execute($SQL)
+    metadata:
+      cwe: "CWE-89: Improper Neutralization of Special Elements used in an SQL Command"
+      owasp: "A03:2021 - Injection"
+
+  - id: subprocess-shell-true
+    message: "subprocess with shell=True on interpolated user input — command injection."
+    severity: ERROR
+    languages: [python]
+    pattern: subprocess.run("..." % ..., shell=True, ...)
+    metadata:
+      cwe: "CWE-78: OS Command Injection"
+      owasp: "A03:2021 - Injection"
+
+  - id: missing-ownership-check
+    message: "Object fetched by id without comparing owner to the session user — IDOR / BOLA."
+    severity: ERROR
+    languages: [python]
+    pattern: $DB.execute("SELECT * FROM notes WHERE id=?", ...)
+    metadata:
+      cwe: "CWE-639: Authorization Bypass Through User-Controlled Key"
+      owasp: "A01:2021 - Broken Access Control"
+
+  - id: client-side-authz
+    message: "Authorization decision deferred to the client — broken access control."
+    severity: ERROR
+    languages: [python]
+    pattern-regex: "checked client-side"
+    metadata:
+      cwe: "CWE-862: Missing Authorization"
+      owasp: "A01:2021 - Broken Access Control"
