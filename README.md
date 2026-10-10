@@ -31,7 +31,8 @@ Copy `.env.example` → `.env.runtime` and fill in keys. Launch attacks from the
 
 ## Materials
 - Slide deck: `slides/parry-deck.html` (+ `.pdf`)
-- 3-min explainer video: `demo/parry-podcast.mp4` (transcript in `demo/podcast-transcript.md`)
+- 3-min explainer video (podcast): `demo/parry-podcast.mp4` (transcript in `demo/podcast-transcript.md`)
+- 3-min app demo (screencast of the live dashboard): `demo/parry-app-demo.mp4`
 - Submission copy: `submission/SUBMISSION.md`
 - Screenshots: `demo/screenshots/`
 
